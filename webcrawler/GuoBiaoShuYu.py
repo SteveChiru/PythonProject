@@ -68,7 +68,7 @@ if __name__ == "__main__":
 
     #   设置要爬取的数据的参数
     category = '船舶'     #设置要爬取的术语的类别
-    pagetotal = 27          #设置要爬取的数据总共有多少页
+    pagetotal = 2          #设置要爬取的数据总共有多少页
     path = 'D:\databank\爬虫\国标术语\国标术语-'+category+'.xls'  #设置excel文件存储路径
 
     workbook = initWorkBook()       # 创建一个workbook 设置编码
