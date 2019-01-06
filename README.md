@@ -1,2 +1,2 @@
 # PythonProject
-S
+Some projects used Python language
