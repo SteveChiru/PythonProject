@@ -27,7 +27,7 @@ def initWorkBook():
 """
 def createWorkSheet(sheetname, workbook = xlwt.Workbook):
     worksheet = workbook.add_sheet(sheetname)
-    worksheet.write(0,0,'标准号'); worksheet.write(0,1,'标准名称');worksheet.write(0,2,'在线预览url')
+    worksheet.write(0,0,'标准号'); worksheet.write(0,1,'标准名称');worksheet.write(0,2,'在线预览url');worksheet.write(0,3,'下载标准url')
     return worksheet
 
 """
@@ -40,14 +40,27 @@ def saveToExcel(pathStr, workbook = xlwt.Workbook):
 在线阅读链接判断：没有在线阅读按钮，输出“无法在线阅读”；否则，输出在线阅读链接
 """
 def getOnlineReadUrl(filenumber):
-    urlonlineread = 'http://c.gb688.cn/bzgk/gb/showGb?type=online&hcno=' + filenumber
+    urlonlinereadurl = 'http://c.gb688.cn/bzgk/gb/showGb?type=online&hcno=' + filenumber
     new_gb_info_url = 'http://www.gb688.cn/bzgk/gb/newGbInfo?hcno=' + filenumber   #标准信息页面
     f = requests.get(new_gb_info_url)                 #Get该网页从而获取该html内容
     soup = BeautifulSoup(f.content, "lxml")  #用lxml解析器解析该网页的内容, 好像f.text也是返回的html
-    zxylstr = soup.find("button",class_="btn ck_btn btn-sm btn-primary")
-    if zxylstr is None: #没有在线预览按钮
-        urlonlineread = '无法在线预览'
-    return urlonlineread
+    zxylbutton = soup.find("button",class_="btn ck_btn btn-sm btn-primary") #获得在线预览button
+    if zxylbutton is None: #没有在线预览按钮
+        urlonlinereadurl = '无法在线预览'
+    return urlonlinereadurl
+
+"""
+下载链接判断：没有下载链接，输出“文档无法下载”；否则，输出下载链接
+"""
+def getDownloadUrl(filenumber):
+    downloadurl = 'http://c.gb688.cn/bzgk/gb/showGb?type=download&hcno=' + filenumber
+    new_gb_info_url = 'http://www.gb688.cn/bzgk/gb/newGbInfo?hcno=' + filenumber   #标准信息页面
+    f = requests.get(new_gb_info_url)                 #Get该网页从而获取该html内容
+    soup = BeautifulSoup(f.content, "lxml")  #用lxml解析器解析该网页的内容, 好像f.text也是返回的html
+    xzbzbutton = soup.find("button",class_="btn xz_btn btn-sm btn-warning") #获得下载标准按钮
+    if xzbzbutton is None:
+        downloadurl = '文档无法下载'
+    return downloadurl
 
 """
 获取一个页面上的数据
@@ -59,10 +72,12 @@ def getDataOfOnePage(pagenumber,datas):
         standardnumber = datas[index].string    #获取标准号
         standardname = datas[index+1].string;standardID = datas[index+1].get('onclick');filenumber = standardID[10:-3] #获取标准名称
         #判断是否可以在线预览，是否可以下载
-        urlonlineread = getOnlineReadUrl(filenumber)    #处理在线阅读链接
+        urlonlinereadurl = getOnlineReadUrl(filenumber)    #处理在线阅读链接
+        downloadurl = getDownloadUrl(filenumber)    #处理下载标准链接
 
         #写数据
-        worksheet.write(row,0,standardnumber);worksheet.write(row,1,standardname);worksheet.write(row,2,urlonlineread)
+        worksheet.write(row,0,standardnumber);worksheet.write(row,1,standardname)
+        worksheet.write(row,2,urlonlinereadurl);worksheet.write(row,3,downloadurl)
 
         index = index + 2
         row = row + 1
