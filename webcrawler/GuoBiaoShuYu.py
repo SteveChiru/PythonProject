@@ -1,3 +1,11 @@
+"""
+需求：
+    1.爬取国家标准全文公开系统上公开的标准，转换成excel数据
+    2.excel文件格式 标准号-标准名称-在线预览链接-下载链接
+细节设计：
+    1.页面中如果没有在线预览按钮，说明无法在线预览，excel表中填入“无法在线预览”
+    2.没有下载链接，则在excel表中输入“文档无法下载”
+"""
 #国家标准全文公开术语链接   标准号-标准名称-在线预览链接
 from bs4 import BeautifulSoup
 from lxml import html
@@ -29,15 +37,29 @@ def saveToExcel(pathStr, workbook = xlwt.Workbook):
     workbook.save(pathStr)
 
 """
+在线阅读链接判断：没有在线阅读按钮，输出“无法在线阅读”；否则，输出在线阅读链接
+"""
+def getOnlineReadUrl(filenumber):
+    urlonlineread = 'http://c.gb688.cn/bzgk/gb/showGb?type=online&hcno=' + filenumber
+    new_gb_info_url = 'http://www.gb688.cn/bzgk/gb/newGbInfo?hcno=' + filenumber   #标准信息页面
+    f = requests.get(new_gb_info_url)                 #Get该网页从而获取该html内容
+    soup = BeautifulSoup(f.content, "lxml")  #用lxml解析器解析该网页的内容, 好像f.text也是返回的html
+    zxylstr = soup.find("button",class_="btn ck_btn btn-sm btn-primary")
+    if zxylstr is None: #没有在线预览按钮
+        urlonlineread = '无法在线预览'
+    return urlonlineread
+
+"""
 获取一个页面上的数据
 """
 def getDataOfOnePage(pagenumber,datas):
     index = 0
     row = 1 + (pagenumber-1)*10
     while index < 20:
-        standardnumber = datas[index].string
-        standardname = datas[index+1].string;standardID = datas[index+1].get('onclick');filenumber = standardID[10:-3]
-        urlonlineread = 'http://c.gb688.cn/bzgk/gb/showGb?type=online&hcno='+filenumber
+        standardnumber = datas[index].string    #获取标准号
+        standardname = datas[index+1].string;standardID = datas[index+1].get('onclick');filenumber = standardID[10:-3] #获取标准名称
+        #判断是否可以在线预览，是否可以下载
+        urlonlineread = getOnlineReadUrl(filenumber)    #处理在线阅读链接
 
         #写数据
         worksheet.write(row,0,standardnumber);worksheet.write(row,1,standardname);worksheet.write(row,2,urlonlineread)
