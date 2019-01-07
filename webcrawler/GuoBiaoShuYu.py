@@ -178,10 +178,8 @@ def setSavePath(category):
 #函数入口
 if __name__ == "__main__":
 
-    #   设置要爬取的数据的参数
-    category = setCategory('船舶')
+    category = setCategory('船舶')    #   设置要爬取的数据类别
     workbook = initWorkBook(category)       # 创建一个workbook 设置编码
-
     getAllData(workbook,category)   #爬取所有数据
 
 
