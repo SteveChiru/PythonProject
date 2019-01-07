@@ -49,23 +49,23 @@ def creatSoup(url):
     return soup
 
 """
-在线阅读链接判断：没有在线阅读按钮，输出“无法在线阅读”；否则，输出在线阅读链接
+在线阅读链接判断：没有在线阅读按钮，输出“None”；否则，输出在线阅读链接
 """
 def getOnlineReadUrl(filenumber,soup):
     urlonlinereadurl = 'http://c.gb688.cn/bzgk/gb/showGb?type=online&hcno=' + filenumber
     zxylbutton = soup.find("button",class_="btn ck_btn btn-sm btn-primary") #获得在线预览button
     if zxylbutton is None: #没有在线预览按钮
-        urlonlinereadurl = '无法在线预览'
+        urlonlinereadurl = 'None'
     return urlonlinereadurl
 
 """
-下载链接判断：没有下载链接，输出“文档无法下载”；否则，输出下载链接
+下载链接判断：没有下载链接，输出“None”；否则，输出下载链接
 """
 def getDownloadUrl(filenumber,soup):
     downloadurl = 'http://c.gb688.cn/bzgk/gb/showGb?type=download&hcno=' + filenumber
     xzbzbutton = soup.find("button",class_="btn xz_btn btn-sm btn-warning") #获得下载标准按钮
     if xzbzbutton is None:
-        downloadurl = '文档无法下载'
+        downloadurl = 'None'
     return downloadurl
 
 """
@@ -118,7 +118,7 @@ def getDataOfOnePage(pagenumber,datas,worksheet,category):
         index = index + 2
         row = row + 1
 
-    print("第"+str(pagenumber)+"页数据获取完毕")
+    print(category+":   第"+str(pagenumber)+"/"+str(pagetotal)+"页数据获取完毕")
 
 """
 获取所需要的所有数据
@@ -160,7 +160,7 @@ def getAllData(workbook,category):
         pageindex = pageindex + 1
 
     saveToExcel(savepath,workbook)  #把数据保存到excel文件内
-    print("共"+str(pagetotal)+"页数据爬取完毕") #信息提示
+    print(category+":   共"+str(pagetotal)+"页数据爬取完毕") #信息提示
 
 """
 设置要爬取的数据的类别
@@ -177,9 +177,12 @@ def setSavePath(category):
 
 #函数入口
 if __name__ == "__main__":
-
-    category = setCategory('船舶')    #   设置要爬取的数据类别
-    workbook = initWorkBook(category)       # 创建一个workbook 设置编码
-    getAllData(workbook,category)   #爬取所有数据
-
+    category_array = ["汽车","机械","电器","医疗器械","制冷","阀","飞机","传感器","发电","船舶","光学","声学","机器人","数控","轮胎","焊接","锁","集装箱","托盘","橡胶"]
+    for c in category_array:
+        print(c+':  数据开始获取')
+        category = setCategory(c)    #   设置要爬取的数据类别
+        workbook = initWorkBook(category)       # 创建一个workbook 设置编码
+        getAllData(workbook,category)   #爬取所有数据
+        print(c+':  excel文档已生成')
+    print('全部excel文档已生成')
 
