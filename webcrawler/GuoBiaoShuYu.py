@@ -1,7 +1,7 @@
 """
 需求：
     1.爬取国家标准全文公开系统上公开的标准，转换成excel数据
-    2.excel文件格式 标准号-标准名称-在线预览链接-下载链接
+    2.excel文件格式 标准号-中文标准名称-英文标准名称-标准状态-在线预览链接-下载链接
 细节设计：
     1.页面中如果没有在线预览按钮，说明无法在线预览，excel表中填入“无法在线预览”
     2.没有下载链接，则在excel表中输入“文档无法下载”
@@ -27,7 +27,11 @@ def initWorkBook():
 """
 def createWorkSheet(sheetname, workbook = xlwt.Workbook):
     worksheet = workbook.add_sheet(sheetname)
-    worksheet.write(0,0,'标准号'); worksheet.write(0,1,'标准名称');worksheet.write(0,2,'在线预览url');worksheet.write(0,3,'下载标准url')
+    #标准号-中文标准名称-英文标准名称-标准状态-在线预览链接-下载链接
+    worksheet.write(0,0,'标准号'); worksheet.write(0,1,'中文标准名称')
+    worksheet.write(0,2,'英文标准名称');worksheet.write(0,3,'标准状态')
+    worksheet.write(0,4,'在线预览url');worksheet.write(0,5,'下载url')
+
     return worksheet
 
 """
@@ -37,13 +41,18 @@ def saveToExcel(pathStr, workbook = xlwt.Workbook):
     workbook.save(pathStr)
 
 """
+使用BeautifulSoup将url地址解析为html文档
+"""
+def creatSoup(url):
+    f = requests.get(url)                 #Get该网页从而获取该html内容
+    soup = BeautifulSoup(f.content, "lxml")  #用lxml解析器解析该网页的内容, 好像f.text也是返回的html
+    return soup
+
+"""
 在线阅读链接判断：没有在线阅读按钮，输出“无法在线阅读”；否则，输出在线阅读链接
 """
-def getOnlineReadUrl(filenumber):
+def getOnlineReadUrl(filenumber,soup):
     urlonlinereadurl = 'http://c.gb688.cn/bzgk/gb/showGb?type=online&hcno=' + filenumber
-    new_gb_info_url = 'http://www.gb688.cn/bzgk/gb/newGbInfo?hcno=' + filenumber   #标准信息页面
-    f = requests.get(new_gb_info_url)                 #Get该网页从而获取该html内容
-    soup = BeautifulSoup(f.content, "lxml")  #用lxml解析器解析该网页的内容, 好像f.text也是返回的html
     zxylbutton = soup.find("button",class_="btn ck_btn btn-sm btn-primary") #获得在线预览button
     if zxylbutton is None: #没有在线预览按钮
         urlonlinereadurl = '无法在线预览'
@@ -52,11 +61,8 @@ def getOnlineReadUrl(filenumber):
 """
 下载链接判断：没有下载链接，输出“文档无法下载”；否则，输出下载链接
 """
-def getDownloadUrl(filenumber):
+def getDownloadUrl(filenumber,soup):
     downloadurl = 'http://c.gb688.cn/bzgk/gb/showGb?type=download&hcno=' + filenumber
-    new_gb_info_url = 'http://www.gb688.cn/bzgk/gb/newGbInfo?hcno=' + filenumber   #标准信息页面
-    f = requests.get(new_gb_info_url)                 #Get该网页从而获取该html内容
-    soup = BeautifulSoup(f.content, "lxml")  #用lxml解析器解析该网页的内容, 好像f.text也是返回的html
     xzbzbutton = soup.find("button",class_="btn xz_btn btn-sm btn-warning") #获得下载标准按钮
     if xzbzbutton is None:
         downloadurl = '文档无法下载'
@@ -69,15 +75,24 @@ def getDataOfOnePage(pagenumber,datas):
     index = 0
     row = 1 + (pagenumber-1)*10
     while index < 20:
-        standardnumber = datas[index].string    #获取标准号
-        standardname = datas[index+1].string;standardID = datas[index+1].get('onclick');filenumber = standardID[10:-3] #获取标准名称
-        #判断是否可以在线预览，是否可以下载
-        urlonlinereadurl = getOnlineReadUrl(filenumber)    #处理在线阅读链接
-        downloadurl = getDownloadUrl(filenumber)    #处理下载标准链接
+        filenumber = datas[index].get('onclick')[10:-3]
+        new_gb_info_url = 'http://www.gb688.cn/bzgk/gb/newGbInfo?hcno=' + filenumber   #标准信息页面
+        soup = creatSoup(new_gb_info_url)
+        #标准号-中文标准名称-英文标准名称-标准状态-在线预览链接-下载链接
+        standard_text = soup.find('h1').get_text()
+        standard_number = standard_text[4:]
+        if '采' in standard_text:
+            standard_number = standard_text[4:-2]
+        standard_chi_name = soup.find('table',class_='tdlist').find('b').string
+        standard_eng_name = soup.find('table',class_='tdlist').find_all('td')[2].string[7:]
+        standard_status = soup.find('span',class_='text-success').string
+        urlonlinereadurl = getOnlineReadUrl(filenumber,soup)    #处理在线阅读链接
+        downloadurl = getDownloadUrl(filenumber,soup)    #处理下载标准链接
 
         #写数据
-        worksheet.write(row,0,standardnumber);worksheet.write(row,1,standardname)
-        worksheet.write(row,2,urlonlinereadurl);worksheet.write(row,3,downloadurl)
+        worksheet.write(row,0,standard_number); worksheet.write(row,1,standard_chi_name)
+        worksheet.write(row,2,standard_eng_name);worksheet.write(row,3,standard_status)
+        worksheet.write(row,4,urlonlinereadurl);worksheet.write(row,5,downloadurl)
 
         index = index + 2
         row = row + 1
