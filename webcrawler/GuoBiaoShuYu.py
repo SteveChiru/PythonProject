@@ -139,7 +139,10 @@ def getDataTotal(category):
 获取总数据的总页数
 """
 def getPageTotal(datatotal):
+    remainder = int(datatotal)%10
     pagetotal = int(datatotal)//10 + 1
+    if remainder == 0:
+        pagetotal = int(datatotal)//10
     return pagetotal
 
 def getAllData(workbook,category):
@@ -177,7 +180,7 @@ def setSavePath(category):
 
 #函数入口
 if __name__ == "__main__":
-    category_array = ["汽车","机械","电器","医疗器械","制冷","阀","飞机","传感器","发电","船舶","光学","声学","机器人","数控","轮胎","焊接","锁","集装箱","托盘","橡胶"]
+    category_array = ["X射线","X-射线"]
     for c in category_array:
         print(c+':  数据开始获取')
         category = setCategory(c)    #   设置要爬取的数据类别
