@@ -1,14 +1,14 @@
-import getpass
+import getpass  #getpass模块提供了平台无关的在命令行下输入密码的方法
 import os
 import sqlite3
-import platform
+import platform     #获取操作系统的信息
 import time
 
 class Config :
     def __init__(self):
-        self.USER = getpass.getuser()
+        self.USER = getpass.getuser()   #获取用户名
         self.appTitle = 'Video-Downloader'
-        self.__getConfigPath()
+        self.__getConfigPath()      #根据不同的操作系统配置不同的路径
 
         self.table = 'config'
         if self.__connect() == False:
@@ -119,4 +119,4 @@ class Config :
             self.configPath = '/Users/' + self.USER + '/Library/Application Support/' + self.appTitle + '/'
         elif osType == 'Windows' :
             sysDrive = os.getenv("SystemDrive")
-            self.configPath = sysDrive + '\\Users\\' + self.USER + '\\Documents\\' + self.appTitle + '\\'
+            self.configPath = sysDrive + '\\Users\\cqr15\\Documents\\' + self.appTitle + '\\'
