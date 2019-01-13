@@ -31,9 +31,9 @@ class GUI :
         self.master.title(self.masterTitle)
         self.master.resizable(width = 'false', height = 'false')
 
-        self.__menu()
-        self.__topBox()
-        self.__autoUpdate()
+        self.__menu()       #app的菜单项
+        self.__topBox()     #app的主界面设计
+        self.__autoUpdate() #
 
     def __menu(self):
 
@@ -60,13 +60,13 @@ class GUI :
     def __topBox(self):
         self.mainTop = tkinter.Frame(self.master, bd = 10)
         self.mainTop.grid(row = 0, column = 0, sticky = '')
-
+        #url输入框
         self.urlInput = tkinter.Entry(self.mainTop, width = 50)
         self.urlInput.grid(row = 0, column = 0)
-
+        #选择框
         s = self.__selector(self.mainTop)
         s.grid(row = 0, column = 1)
-
+        #搜索按钮
         self.__searchBtn()
 
     def __selector(self,position):
@@ -152,7 +152,7 @@ class GUI :
 
     def __searchBtn(self,stat=True):
         if stat :
-            self.sBtn = tkinter.Button(self.mainTop, text = '搜索', width = 10, command = self.__showResult)
+            self.sBtn = tkinter.Button(self.mainTop, text = '搜索', width = 10, command = self.__showResult)  #点击搜索按钮，执行showResult函数
             self.sBtn.grid(row = 0, column = 2)
         else :
             self.sBtn = tkinter.Button(self.mainTop, text = '分析中...', width = 10, command = '')
