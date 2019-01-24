@@ -180,7 +180,7 @@ def setSavePath(category):
 
 #函数入口
 if __name__ == "__main__":
-    category_array = ["X射线","X-射线"]
+    category_array = ["插座","散热器"]
     for c in category_array:
         print(c+':  数据开始获取')
         category = setCategory(c)    #   设置要爬取的数据类别
