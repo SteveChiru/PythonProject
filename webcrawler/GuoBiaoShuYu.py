@@ -19,7 +19,7 @@ import urllib.parse
 使用xlwt模块初始化一个workbook
 返回值：初始化后的workbook
 """
-def initWorkBook(category):
+def initWorkBook():
     workbook = xlwt.Workbook(encoding='utf-8')
     return workbook
 
@@ -184,7 +184,7 @@ if __name__ == "__main__":
     for c in category_array:
         print(c+':  数据开始获取')
         category = setCategory(c)    #   设置要爬取的数据类别
-        workbook = initWorkBook(category)       # 创建一个workbook 设置编码
+        workbook = initWorkBook()       # 创建一个workbook 设置编码
         getAllData(workbook,category)   #爬取所有数据
         print(c+':  excel文档已生成')
     print('全部excel文档已生成')
