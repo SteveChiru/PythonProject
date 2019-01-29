@@ -84,11 +84,13 @@ def getStandardStatus(beautifulsoup):
 
 def getDataOfOnePage(pagenumber,datas,worksheet,category):
     datatotal = getDataTotal(category)
+    remainder = int(datatotal)%10
     pagetotal = getPageTotal(datatotal)
     data_number_per_page = 10
     row = 1 + (pagenumber-1)*10
     if pagenumber is pagetotal:
-        data_number_per_page = int(datatotal)%10
+        if remainder != 0:
+            data_number_per_page = int(datatotal)%10
 
     index = 0
     index_total = 2 * data_number_per_page
@@ -180,7 +182,7 @@ def setSavePath(category):
 
 #函数入口
 if __name__ == "__main__":
-    category_array = ["插座","散热器"]
+    category_array = ["冰箱","洗衣机"]
     for c in category_array:
         print(c+':  数据开始获取')
         category = setCategory(c)    #   设置要爬取的数据类别
